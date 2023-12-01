@@ -27,3 +27,24 @@ In this example, the calibration values of these four lines are <code>12</code>,
 Consider your entire calibration document. <em>What is the sum of all of the calibration values?</em>
 
 
+## --- Part Two ---
+Your calculation isn't quite right. It looks like some of the digits are actually <em>spelled out with letters</em>: <code>one</code>, <code>two</code>, <code>three</code>, <code>four</code>, <code>five</code>, <code>six</code>, <code>seven</code>, <code>eight</code>, and <code>nine</code> <em>also</em> count as valid "digits".
+
+Equipped with this new information, you now need to find the real first and last digit on each line. For example:
+
+<pre>
+<code>two1nine
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen
+</code>
+</pre>
+
+In this example, the calibration values are <code>29</code>, <code>83</code>, <code>13</code>, <code>24</code>, <code>42</code>, <code>14</code>, and <code>76</code>. Adding these together produces <code><em>281</em></code>.
+
+<em>What is the sum of all of the calibration values?</em>
+
+
