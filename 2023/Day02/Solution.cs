@@ -23,7 +23,7 @@ class Solution : Solver {
         return new(red,green,blue);
     }
     record CubeSet(int Red, int Green, int Blue);
-    record Game(int Id, IEnumerable<CubeSet> Sets);
+    record Game(int Id, IEnumerable<CubeSet> Sets, CubeSet MiniumSet);
 
     public object PartOne(string input) {
         var games = ReadGames(input);
@@ -31,7 +31,9 @@ class Solution : Solver {
     }
 
     public object PartTwo(string input) {
-        return 0;
+        var games = ReadGames(input);
+        var powerOfMinSets = PowerOfMiniumSets(games);
+        return powerOfMinSets.Sum();
     }
 
     IEnumerable<Game> ReadGames(string input)
@@ -48,7 +50,7 @@ class Solution : Solver {
             {
                 cubeSets.Add(FromString(set));
             }
-            games.Add(new(id, cubeSets));
+            games.Add(new(id, cubeSets, CalculateMinimumSet(cubeSets)));
         }
         return games;
     }
@@ -65,8 +67,26 @@ class Solution : Solver {
         return true;
     }
 
+    IEnumerable<Game> PossibleGames(IEnumerable<Game> games)
+    {
+            return games.Where(i => GameIsPossible(i, 12, 13, 14));
+    }
+
     int SumIdsOfPossibleGames(IEnumerable<Game> games)
     {
-        return games.Where(i => GameIsPossible(i, 12, 13, 14)).Sum(i => i.Id);
+       return PossibleGames(games).Sum(i => i.Id);
+    }
+
+    CubeSet CalculateMinimumSet(IEnumerable<CubeSet> sets)
+    {
+        var rMax = sets.Select(i => i.Red).Max();
+        var gMax = sets.Select(i => i.Green).Max();
+        var bMax = sets.Select(i => i.Blue).Max();
+        return new(rMax, gMax, bMax);
+    }
+
+    IEnumerable<int> PowerOfMiniumSets(IEnumerable<Game> games)
+    {
+        return games.Select(i => i.MiniumSet.Red * i.MiniumSet.Green * i.MiniumSet.Blue);
     }
 }
