@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Text;
 using AngleSharp.Common;
+using System.Drawing;
 
 namespace AdventOfCode.Y2023.Day04;
 
@@ -22,10 +23,22 @@ class Solution : Solver {
         return cards.Count() + copies.Count();
     }
 
-    record Card(int Number, IEnumerable<int> WinningNumbers, IEnumerable<int> MyNumbers)
+    record Card
     {
-        public int MatchCount => MyNumbers.Intersect(WinningNumbers).Count(); 
-        public int Points => (int)(MatchCount == 0 ? 0 : Math.Pow(2, MatchCount-1));
+        public int Number { get; }
+        public IEnumerable<int> WinningNumbers { get; }
+        public IEnumerable<int> MyNumbers { get;}
+        public int MatchCount { get; }
+        public int Points { get; }
+
+        public Card(int number, IEnumerable<int> winningNumbers, IEnumerable<int> myNumbers)
+        {
+            Number = number;
+            WinningNumbers = winningNumbers;
+            MyNumbers = myNumbers;
+            MatchCount = MyNumbers.Intersect(WinningNumbers).Count();
+            Points = (int)(MatchCount == 0 ? 0 : Math.Pow(2, MatchCount-1));
+        }
 
         public IEnumerable<Card> GetCopies(IEnumerable<Card> cards)
         {
