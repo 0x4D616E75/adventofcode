@@ -11,23 +11,24 @@ namespace AdventOfCode.Y2023.Day06;
 class Solution : Solver {
 
     public object PartOne(string input) {
-        var races = Parse(input);
+        var races = ParsePartOne(input);
         var wins = races.Select(i => FindWaysToWin(i,GetPossibleButtonPress(i.Time)));
         return wins.Aggregate(1, (a,b) => a * b);
     }
 
     public object PartTwo(string input) {
-        return 0;
+        var race = ParsePartTwo(input);
+        return FindWaysToWin(race, GetPossibleButtonPress(race.Time));
     }
 
-    record Race(int Time, int Distance);
+    record Race(long Time, long Distance);
 
     record ButtonPress
     {
-        public int Speed;
-        public int Duration;
-        public int Distance;
-        public ButtonPress(int speed, int duration)
+        public long Speed;
+        public long Duration;
+        public long Distance;
+        public ButtonPress(long speed, long duration)
         {
             Speed = speed;
             Duration = duration;
@@ -35,7 +36,7 @@ class Solution : Solver {
         }
     }
     
-    IEnumerable<Race> Parse(string input)
+    IEnumerable<Race> ParsePartOne(string input)
     {
         var matches = Regex.Matches(input, @"\d+");
         var mid = matches.Count() / 2;
@@ -49,7 +50,22 @@ class Solution : Solver {
         return races;
     }
 
-    IEnumerable<ButtonPress> GetPossibleButtonPress(int time)
+    Race ParsePartTwo(string input)
+    {
+        var matches = Regex.Matches(input, @"\d+");
+        var mid = matches.Count() / 2;
+        string timeAll = "", distanceAll = "";
+        for(var i = 0; i < mid; i++)
+        {
+            var time = int.Parse(matches.ElementAt(i).Value);
+            var distance = int.Parse(matches.ElementAt(mid + i).Value);
+            timeAll += time;
+            distanceAll += distance;
+        }
+        return new (long.Parse(timeAll), long.Parse(distanceAll));
+    }
+
+    IEnumerable<ButtonPress> GetPossibleButtonPress(long time)
     {
         var presses = new List<ButtonPress>();
         for(var i = 1; i < time; i++)
@@ -66,7 +82,6 @@ class Solution : Solver {
         {
             if(press.Distance > race.Distance)
             {
-                Console.WriteLine($"Race: {race.Time}/{race.Distance} -> Press {press.Speed}/{press.Duration}");
                 wins++;
             }
         }
