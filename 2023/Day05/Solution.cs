@@ -7,6 +7,8 @@ using System.Text;
 using AngleSharp.Common;
 using System.Numerics;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace AdventOfCode.Y2023.Day05;
 
@@ -28,19 +30,19 @@ class Solution : Solver {
         long minLocation = -1;
         foreach(var seed in almanac.SeedsWithRange)
         {
-            for(long i = 0; i < seed.Length; i++)
+            Parallel.For(0, seed.Length, i => 
             {
                 var location = almanac.GetLocationOfSeed(seed.Start + i);
                 if(minLocation == -1)
                 {
                     minLocation = location;
-                    continue;
                 }
                 if(minLocation > location)
                 {
                     minLocation = location;
                 }
-            }
+            });
+            Console.WriteLine("finshed");
         }
         return minLocation;
     }
@@ -60,33 +62,40 @@ class Solution : Solver {
         return new Almanac(seeds, seedToSoil, soilToFertilizer, fertilizerToWater, waterToLight, lightToTemperature, temperatureToHumidity, humidityToLocation);
     }
 
-    record Entry
+    record Map
     {
-        public long Destination;
-        public long Source;
-        public long Length;
-        public long SourceEnd;
-        public Entry(long destination, long source, long length)
+        public Range Destination;
+        public Range Source;
+        public Map(long destination, long source, long length)
         {
-            Destination = destination;
-            Source = source;
-            Length = length;
-            SourceEnd = source + length;
+            Destination = new (destination, length);
+            Source = new (source, length);
         }
     }
 
-    record SeedRange(long Start, long Length);
+    record Range
+    {
+        public long Start;
+        public long End;
+        public long Length;
+        public Range(long start, long length)
+        {
+            Start = start;
+            End = start + length;
+            Length = length;
+        }
+    }
     record Almanac
     {
         public IEnumerable<long> Seeds;
-        public IEnumerable<SeedRange> SeedsWithRange;
-        IEnumerable<Entry> SeedToSoil;
-        IEnumerable<Entry> SoilToFertilizer;
-        IEnumerable<Entry> FertilizerToWater;
-        IEnumerable<Entry> WaterToLight;
-        IEnumerable<Entry> LightToTemperature;
-        IEnumerable<Entry> TemperatureToHumidity;
-        IEnumerable<Entry> HumidityToLocation;
+        public IEnumerable<Range> SeedsWithRange;
+        IEnumerable<Map> SeedToSoil;
+        IEnumerable<Map> SoilToFertilizer;
+        IEnumerable<Map> FertilizerToWater;
+        IEnumerable<Map> WaterToLight;
+        IEnumerable<Map> LightToTemperature;
+        IEnumerable<Map> TemperatureToHumidity;
+        IEnumerable<Map> HumidityToLocation;
         public Almanac(IEnumerable<long> seeds,
                    IEnumerable<long> seedToSoil,
                    IEnumerable<long> soilToFertilizer,
@@ -107,8 +116,6 @@ class Solution : Solver {
             HumidityToLocation = GenerateMap(humidityToLocation);
         }
 
-
-
         public long GetLocationOfSeed(long seed)
         {
             var soil = GetValue(SeedToSoil, seed);
@@ -120,38 +127,40 @@ class Solution : Solver {
             var location = GetValue(HumidityToLocation, humidity);
             return location;
         }
-        long GetValue(IEnumerable<Entry> map, long source)
+        long GetValue(IEnumerable<Map> map, long source)
         {
-            var value = map.Where(i => source >= i.Source && source <= i.SourceEnd).SingleOrDefault();
-            if(value != null)
+            foreach(var entry in map)
             {
-                return value.Destination + (source - value.Source);
+                if(source >= entry.Source.Start && source < entry.Source.End)
+                {
+                    return entry.Destination.Start + (source - entry.Source.Start);
+                }
             }
-            else
-            {
-                return source;
-            }
+
+            return source;
         }
-        IEnumerable<Entry> GenerateMap(IEnumerable<long> inMap)
+        IEnumerable<Map> GenerateMap(IEnumerable<long> inMap)
         {
-            var outMap = new List<Entry>();
-            for(var i = 0; i < inMap.Count(); i += 3)
+            var outMap = new LinkedList<Map>();
+            var count = inMap.Count();
+            for(var i = 0; i < count; i += 3)
             {
                 var dest = inMap.GetItemByIndex(i);
                 var src = inMap.GetItemByIndex(i+1);
                 var len = inMap.GetItemByIndex(i+2);
-                outMap.Add(new(dest, src, len));
+                outMap.AddLast(new Map(dest, src, len));
             }
             return outMap;
         }
-        IEnumerable<SeedRange> ExtractSeedsWithRange(IEnumerable<long> seeds)
+        IEnumerable<Range> ExtractSeedsWithRange(IEnumerable<long> seeds)
         {
-            var seedsWithRange = new List<SeedRange>();
-            for(var i = 0; i < seeds.Count(); i += 2)
+            var seedsWithRange = new LinkedList<Range>();
+            var count = seeds.Count();
+            for(var i = 0; i < count; i += 2)
             {
                 var start = seeds.GetItemByIndex(i);
                 var len = seeds.GetItemByIndex(i+1);
-                seedsWithRange.Add(new SeedRange(start, len));
+                seedsWithRange.AddLast(new Range(start, len));
             }
             return seedsWithRange;
         }
