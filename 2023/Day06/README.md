@@ -37,7 +37,7 @@ So, because the first race lasts 7 milliseconds, you only have a few options:
  - Hold the button for <em><code>4</code> milliseconds</em>. After its remaining 3 milliseconds of travel time, the boat will have gone <em><code>12</code> millimeters</em>.
  - Hold the button for <em><code>5</code> milliseconds</em>, causing the boat to travel a total of <em><code>10</code> millimeters</em>.
  - Hold the button for <em><code>6</code> milliseconds</em>, causing the boat to travel a total of <em><code>6</code> millimeters</em>.
- - Hold the button for <em><code>7</code> milliseconds</em>. That's the entire duration of the race. You never let go of the button. The boat can't move until you let you of the button. Please make sure you let go of the button so the boat gets to move. <em><code>0</code> millimeters</em>.
+ - Hold the button for <em><code>7</code> milliseconds</em>. That's the entire duration of the race. You never let go of the button. The boat can't move until you let go of the button. Please make sure you let go of the button so the boat gets to move. <em><code>0</code> millimeters</em>.
 
 Since the current record for this race is <code>9</code> millimeters, there are actually <code><em>4</em></code> different ways you could win: you could hold the button for <code>2</code>, <code>3</code>, <code>4</code>, or <code>5</code> milliseconds at the start of the race.
 
@@ -48,5 +48,29 @@ In the third race, you could hold the button for at least <code>11</code> millis
 To see how much margin of error you have, determine the <em>number of ways you can beat the record</em> in each race; in this example, if you multiply these values together, you get <code><em>288</em></code> (<code>4</code> * <code>8</code> * <code>9</code>).
 
 Determine the number of ways you could beat the record in each race. <em>What do you get if you multiply these numbers together?</em>
+
+
+## --- Part Two ---
+As the race is about to start, you realize the piece of paper with race times and record distances you got earlier actually just has very bad [kerning](https://en.wikipedia.org/wiki/Kerning). There's really <em>only one race</em> - ignore the spaces between the numbers on each line.
+
+So, the example from before:
+
+<pre>
+<code>Time:      7  15   30
+Distance:  9  40  200
+</code>
+</pre>
+
+...now instead means this:
+
+<pre>
+<code>Time:      71530
+Distance:  940200
+</code>
+</pre>
+
+Now, you have to figure out how many ways there are to win this single race. In this example, the race lasts for <em><code>71530</code> milliseconds</em> and the record distance you need to beat is <em><code>940200</code> millimeters</em>. You could hold the button anywhere from <code>14</code> to <code>71516</code> milliseconds and beat the record, a total of <code><em>71503</em></code> ways!
+
+<em>How many ways can you beat the record in this one much longer race?</em>
 
 
