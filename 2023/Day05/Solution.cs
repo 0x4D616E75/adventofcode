@@ -27,22 +27,32 @@ class Solution : Solver {
 
     public object PartTwo(string input) {
         var almanac = Parse(input);
-        long minLocation = -1;
+        long minLocation = long.MaxValue;
+        // Parallel.ForEach(almanac.SeedsWithRange, seed => {
+        //     for(var i = 0; i < seed.Length; i++)
+        //     {
+        //         var t = almanac.GetSeedFromLocation(i);
+        //         if(seed.Start >= t && t < seed.End)
+        //         {
+        //             if(t < minLocation)
+        //             {
+        //                 minLocation = t;
+        //             }
+        //             break;
+        //         }
+        //     }
+        // });
+
         foreach(var seed in almanac.SeedsWithRange)
         {
             Parallel.For(0, seed.Length, i => 
             {
                 var location = almanac.GetLocationOfSeed(seed.Start + i);
-                if(minLocation == -1)
-                {
-                    minLocation = location;
-                }
                 if(minLocation > location)
                 {
                     minLocation = location;
                 }
             });
-            Console.WriteLine("finshed");
         }
         return minLocation;
     }
@@ -96,6 +106,13 @@ class Solution : Solver {
         IEnumerable<Map> LightToTemperature;
         IEnumerable<Map> TemperatureToHumidity;
         IEnumerable<Map> HumidityToLocation;
+        IEnumerable<Map> BSeedToSoil;
+        IEnumerable<Map> BSoilToFertilizer;
+        IEnumerable<Map> BFertilizerToWater;
+        IEnumerable<Map> BWaterToLight;
+        IEnumerable<Map> BLightToTemperature;
+        IEnumerable<Map> BTemperatureToHumidity;
+        IEnumerable<Map> BHumidityToLocation;
         public Almanac(IEnumerable<long> seeds,
                    IEnumerable<long> seedToSoil,
                    IEnumerable<long> soilToFertilizer,
@@ -114,8 +131,20 @@ class Solution : Solver {
             LightToTemperature = GenerateMap(lightToTemperature);
             TemperatureToHumidity = GenerateMap(temperatureToHumidity);
             HumidityToLocation = GenerateMap(humidityToLocation);
+
+            BSeedToSoil = BGenerateMap(seedToSoil);
+            BSoilToFertilizer = BGenerateMap(soilToFertilizer);
+            BFertilizerToWater = BGenerateMap(fertilizerToWater);
+            BWaterToLight = BGenerateMap(waterToLight);
+            BLightToTemperature = BGenerateMap(lightToTemperature);
+            BTemperatureToHumidity = BGenerateMap(temperatureToHumidity);
+            BHumidityToLocation = BGenerateMap(humidityToLocation);
         }
 
+        public bool IsInRange(long seed)
+        {
+            return SeedsWithRange.Count(i => i.Start >= seed && seed < i.End) > 0;
+        }
         public long GetLocationOfSeed(long seed)
         {
             var soil = GetValue(SeedToSoil, seed);
@@ -126,6 +155,19 @@ class Solution : Solver {
             var humidity = GetValue(TemperatureToHumidity, temperature);
             var location = GetValue(HumidityToLocation, humidity);
             return location;
+        }
+
+        public long GetSeedFromLocation(long location)
+        {
+            var humidity = GetValue(BHumidityToLocation, location);
+            var temperature = GetValue(BTemperatureToHumidity, humidity);
+            var light = GetValue(BLightToTemperature, temperature);
+            var water = GetValue(BWaterToLight, light);
+            var fertilizer = GetValue(BFertilizerToWater, water);
+            var soil = GetValue(BSoilToFertilizer, fertilizer);
+            var seed = GetValue(BSeedToSoil, soil);
+            
+            return seed;
         }
         long GetValue(IEnumerable<Map> map, long source)
         {
@@ -141,28 +183,16 @@ class Solution : Solver {
         }
         IEnumerable<Map> GenerateMap(IEnumerable<long> inMap)
         {
-            var outMap = new LinkedList<Map>();
-            var count = inMap.Count();
-            for(var i = 0; i < count; i += 3)
-            {
-                var dest = inMap.GetItemByIndex(i);
-                var src = inMap.GetItemByIndex(i+1);
-                var len = inMap.GetItemByIndex(i+2);
-                outMap.AddLast(new Map(dest, src, len));
-            }
-            return outMap;
+            return inMap.Chunk(3).Select(i => new Map(i[0],i[1],i[2]));
+        }
+        IEnumerable<Map> BGenerateMap(IEnumerable<long> inMap)
+        {
+            var t= inMap.Chunk(3).Select(i => new Map(i[1],i[0],i[2]));
+            return t;
         }
         IEnumerable<Range> ExtractSeedsWithRange(IEnumerable<long> seeds)
         {
-            var seedsWithRange = new LinkedList<Range>();
-            var count = seeds.Count();
-            for(var i = 0; i < count; i += 2)
-            {
-                var start = seeds.GetItemByIndex(i);
-                var len = seeds.GetItemByIndex(i+1);
-                seedsWithRange.AddLast(new Range(start, len));
-            }
-            return seedsWithRange;
+            return seeds.Chunk(2).Select(i => new Range(i[0], i[1]));
         }
     }
 }
