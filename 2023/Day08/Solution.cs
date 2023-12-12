@@ -18,7 +18,7 @@ class Solution : Solver {
     public object PartTwo(string input) {
         var (instructions, maps) = Parse(input, "A");
         var exits = maps.Select(i => FindExit(instructions._instructions, i, "Z"));
-        return exits.Sum();
+        return LeastCommonMultiple(exits);
     }
 
     public class Map
@@ -88,4 +88,24 @@ class Solution : Solver {
         while(!next.Start.EndsWith(exit));
         return steps;
     }
+
+    long LeastCommonMultiple(IEnumerable<long> numbers)
+    {
+        static long greatestCommonDivisor(long a, long b)
+        {
+            if(b == 0)
+            {
+                return a;
+            }
+            return greatestCommonDivisor(b, a % b);
+        }
+
+        static long leastCommonMultiple(long a, long b)
+        {
+            return Math.Abs(a * b) / greatestCommonDivisor(a, b);
+        }
+
+        return numbers.Aggregate(leastCommonMultiple);
+    }
+
 }
